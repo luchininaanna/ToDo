@@ -3,8 +3,11 @@ package com.jtodo.workWithFiles;
 import com.jtodo.status.*;
 import com.jtodo.toDoObjects.*;
 import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.JSONArray;
 
 import java.io.BufferedReader;
+import java.util.Iterator;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -12,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DataWorker implements IDataWorker {
+
     private static final String IN_PROCESS = "In process";
     private static final String COMPLETED = "Completed";
 
@@ -44,20 +48,26 @@ public class DataWorker implements IDataWorker {
             FileReader fr = new FileReader(file);
             BufferedReader reader = new BufferedReader(fr);
 
-            String line;
-            line = reader.readLine();
-            while (line != null) {
-                JSONObject json = new JSONObject(line);
-                String name = json.getString("name");
-                String status = json.getString("status");
+            String line = reader.readLine();
+            Object obj = new JSONParser().parse(line);
+            JSONObject jsonObject = new JSONObject(line);
+
+            JSONArray phoneNumbersArr = jsonObject.getJSONArray("tasks");
+
+            Iterator phonesItr = phoneNumbersArr.iterator();
+
+            while (phonesItr.hasNext()) {
+                JSONObject test = (JSONObject) phonesItr.next();
+
+                String name = (String) test.get("name");
+                String status = (String) test.get("status");
 
                 IStatus dealStatus;
                 dealStatus = defineStatus(status);
                 IDeal newDeal = new Deal(name, dealStatus);
                 newList.addDeal(newDeal);
-
-                line = reader.readLine();
             }
+
             list.addList(newList);
             reader.close();
         }
@@ -85,13 +95,23 @@ public class DataWorker implements IDataWorker {
             FileWriter writer = new FileWriter(pathStr);
 
             List<IDeal> deals = list.getDeals();
+
+            JSONObject json = new JSONObject();
+
+            JSONArray array = new JSONArray();
+
+            int id = 0;
+
             for (IDeal deal : deals) {
-                JSONObject json = new JSONObject();
-                json.put("name", deal.getName());
-                json.put("status", deal.getStatus());
-                writer.write(json.toString());
-                writer.append('\n');
+
+                JSONObject element = new JSONObject();
+                element.put("name", deal.getName());
+                element.put("status", deal.getStatus());
+                id++;
+                array.put(element);
             }
+            json.put("tasks", array);
+            writer.write(json.toString());
             writer.flush();
             writer.close();
         }
