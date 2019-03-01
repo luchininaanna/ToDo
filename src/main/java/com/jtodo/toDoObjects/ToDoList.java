@@ -97,9 +97,10 @@ public class ToDoList implements IToDoList {
     public String toString() {
         StringBuilder res = new StringBuilder(this.nameOfToDoList);
         res.append('\n');
-        for (int i = 0; i < this.dealsInList.size(); i++)
-            res.append(Integer.toString(i) + Integer.toString(1) + ". " + this.dealsInList.get(i).getName() + ": " + this.dealsInList.get(i).getStatus() + "\n");
-
+        for (int i = 0; i < this.dealsInList.size(); i++) {
+            int j = i + 1;
+            res.append(Integer.toString(j) + ". " + this.dealsInList.get(i).getName() + ": " + this.dealsInList.get(i).getStatus() + "\n");
+        }
         if (res.toString().equals(this.nameOfToDoList + '\n'))
             res.append(BLANK_LIST);
 
